@@ -17,6 +17,10 @@ import fr.afcepf.atod.ws.currency.exception.CurrenciesWSException;
  */
 @Stateless
 public class CurrencyDao implements ICurrencyDao, Serializable {
+    /*****************************************************
+     * Requetes HQL.
+     ****************************************************/
+    private static final String REQFINDCURRENCYBYCODE = "SELECT c FROM Currency c WHERE c.code = :code";
     /**
      * setting injected entity manager..
      */
@@ -53,8 +57,12 @@ public class CurrencyDao implements ICurrencyDao, Serializable {
 
     @Override
     public Currency find(Integer paramId) throws CurrenciesWSException {
-        // TODO Auto-generated method stub
-        return null;
+        Currency c = null;
+        c = em.find(Currency.class, paramId);
+        if (c == null) {
+            throw new CurrenciesWSException(CurrenciesWSError.RECHERCHE_NON_PRESENTE_EN_BASE, "object not found!");
+        }
+        return c;
     }
 
     @Override
@@ -74,5 +82,17 @@ public class CurrencyDao implements ICurrencyDao, Serializable {
     public Boolean deleteAllCurrencies() {
         em.createQuery("DELETE FROM Currency").executeUpdate();
         return true;
+    }
+
+    @Override
+    public Currency findByCode(String paramCode) throws CurrenciesWSException {
+        Currency c = null;
+        c = (Currency) em.createQuery(REQFINDCURRENCYBYCODE)
+                .setParameter("code", paramCode)
+                .getSingleResult();
+        if (c == null) {
+            throw new CurrenciesWSException(CurrenciesWSError.RECHERCHE_NON_PRESENTE_EN_BASE, "object not found!");
+        }
+        return c;
     }
 }

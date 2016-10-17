@@ -40,6 +40,13 @@ public interface ICurrencyDao {
      */
     Currency find(Integer id)    throws CurrenciesWSException;
     /**
+     * Retrieve method for a {@link DTCurrency} object.
+     * @param code The iso code of the {@link DTCurrency}
+     * @return a {@link DTCurrency} object
+     * @throws CurrenciesWSException custom exception
+     */
+    Currency findByCode(String code)    throws CurrenciesWSException;
+    /**
      * Retrieve method for all {@link DTCurrency} objects.
      * @return a List of {@link DTCurrency} objects
      * @throws CurrenciesWSException custom exception
