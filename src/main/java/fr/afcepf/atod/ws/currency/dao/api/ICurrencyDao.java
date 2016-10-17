@@ -31,7 +31,7 @@ public interface ICurrencyDao {
      * @return Boolean return the result of the currency object deletion
      * @throws CurrenciesWSException custom exception
      */
-    Boolean remove(Currency c)   throws CurrenciesWSException;
+    Boolean delete(Currency c)   throws CurrenciesWSException;
     /**
      * Retrieve method for a {@link DTCurrency} object.
      * @param id The Integer identifier of the {@link DTCurrency}

@@ -25,7 +25,7 @@ import fr.afcepf.atod.ws.currency.exception.CurrenciesWSException;
  *
  */
 @RunWith(Arquillian.class)
-public class TestDaoCurrencyFindAll {
+public class TestCurrencyDao {
     /**
      * Setup Arquillian on deploy.
      * @return a JavaArchive for Arquillian
@@ -49,6 +49,10 @@ public class TestDaoCurrencyFindAll {
      */
     @EJB
     private ICurrencyDao dao;
+    /**
+     * wait timer.
+     */
+    private static final int MILLIS_TIMER = 1000;
     /**
      * an expected currency in bdd.
      */
@@ -102,23 +106,115 @@ public class TestDaoCurrencyFindAll {
      */
     private List<Currency> list = new ArrayList<Currency>();
     /**
-     * succes case test with a valid list of result.
-     * @throws CurrenciesWSException ne doit pas passer ici.
+     * Default Constructor.
      */
-    @Test
-    public void testFindAllSuccess() throws CurrenciesWSException {
-        try {
-            insertSampleRecords();
-        } catch (Exception paramE) {
-            // TODO Auto-generated catch block
-            paramE.printStackTrace();
-        }
+    public TestCurrencyDao() {
         validCurrency1 = new Currency(ID_VALID_CURRENCY1, "dollar",
                 "USD", RATE_VALID_CURRENCY1);
         validCurrency2 = new Currency(ID_VALID_CURRENCY2, "livre sterling",
                 "GBP", RATE_VALID_CURRENCY2);
         validCurrency3 = new Currency(ID_VALID_CURRENCY3, "euro",
                 "EUR", RATE_VALID_CURRENCY3);
+        invalidCurrency = new Currency(ID_INVALID_CURRENCY, "yen",
+                "JPY", RATE_INVALID_CURRENCY);
+    }
+    /**
+     * insert method success Test.
+     * @throws CurrenciesWSException custom exception
+     */
+    @Test
+    public void testInsertSuccess() throws CurrenciesWSException {
+        dao.deleteAllCurrencies();
+        Currency c = dao.insert(validCurrency1);
+        Assert.assertNotNull(c);
+        Assert.assertNotNull(c.getId());
+        Assert.assertNotNull(c.getName());
+        Assert.assertNotNull(c.getCode());
+        Assert.assertNotNull(c.getRate());
+        Assert.assertNotNull(c.getCreatedAt());
+        Assert.assertNotNull(c.getUpdatedAt());
+        Assert.assertEquals(c.getCreatedAt(), c.getUpdatedAt());
+    }
+    /**
+     * update method success Test.
+     * @throws CurrenciesWSException custom exception
+     */
+    @Test
+    public void testUpdateSuccess() throws CurrenciesWSException {
+        insertSampleRecords();
+        validCurrency1.setName("toto");
+        Currency c = dao.find(validCurrency1.getId());
+        c.setName("toto");
+        try {
+            Thread.sleep(MILLIS_TIMER);
+        } catch (InterruptedException paramE) {
+            // TODO Auto-generated catch block
+            paramE.printStackTrace();
+        }
+        Boolean ret = dao.update(c);
+        Currency c2 = dao.find(validCurrency1.getId());
+        Assert.assertEquals(true, ret);
+        Assert.assertNotNull(c2);
+        Assert.assertNotNull(c2.getId());
+        Assert.assertNotNull(c2.getName());
+        Assert.assertNotNull(c2.getCode());
+        Assert.assertNotNull(c2.getRate());
+        Assert.assertNotNull(c2.getCreatedAt());
+        Assert.assertNotNull(c2.getUpdatedAt());
+        Assert.assertNotEquals(c2.getCreatedAt(), c2.getUpdatedAt());
+        Assert.assertEquals(c2.getId(), validCurrency1.getId());
+        Assert.assertEquals(c2.getName(), validCurrency1.getName());
+        Assert.assertEquals(c2.getCode(), validCurrency1.getCode());
+        Assert.assertEquals(c2.getRate(), validCurrency1.getRate());
+    }
+    /**
+     * delete method success Test.
+     * @throws CurrenciesWSException custom exception
+     */
+    @Test(expected = CurrenciesWSException.class)
+    public void testDeleteSuccess() throws CurrenciesWSException {
+        insertSampleRecords();
+        Currency c = dao.find(validCurrency1.getId());
+        Boolean ret = dao.delete(c);
+        Assert.assertEquals(true, ret);
+        dao.find(validCurrency1.getId());
+    }
+    /**
+     * find method success Test.
+     * @throws CurrenciesWSException custom exception
+     */
+    @Test
+    public void testFindSuccess() throws CurrenciesWSException {
+        insertSampleRecords();
+        Currency c = dao.find(validCurrency1.getId());
+        Assert.assertNotNull(c);
+        Assert.assertNotNull(c.getId());
+        Assert.assertNotNull(c.getName());
+        Assert.assertNotNull(c.getCode());
+        Assert.assertNotNull(c.getRate());
+        Assert.assertNotNull(c.getCreatedAt());
+        Assert.assertNotNull(c.getUpdatedAt());
+        Assert.assertEquals(c.getId(), validCurrency1.getId());
+        Assert.assertEquals(c.getName(), validCurrency1.getName());
+        Assert.assertEquals(c.getCode(), validCurrency1.getCode());
+        Assert.assertEquals(c.getRate(), validCurrency1.getRate());
+    }
+    /**
+     * find method failure Test.
+     * @throws CurrenciesWSException custom exception
+     */
+    @Test(expected = CurrenciesWSException.class)
+    public void testFindFailure() throws CurrenciesWSException {
+        insertSampleRecords();
+        dao.find(invalidCurrency.getId());
+    }
+    /**
+     * succes case test with a valid list of result.
+     * @throws CurrenciesWSException ne doit pas passer ici.
+     */
+    @Test
+    public void testFindAllSuccess() throws CurrenciesWSException {
+        insertSampleRecords();
         list.add(validCurrency1);
         list.add(validCurrency2);
         list.add(validCurrency3);
@@ -140,20 +236,9 @@ public class TestDaoCurrencyFindAll {
      * Failure test case 1.
      */
     @Test
-    public void testConnectionEchec() {
+    public void testFindAllEchec() {
         try {
-            try {
-                insertSampleRecords();
-            } catch (Exception paramE) {
-                // TODO Auto-generated catch block
-                paramE.printStackTrace();
-            }
-            validCurrency1 = new Currency(ID_VALID_CURRENCY1, "dollar",
-                    "USD", RATE_VALID_CURRENCY1);
-            validCurrency2 = new Currency(ID_VALID_CURRENCY2, "livre sterling",
-                    "GBP", RATE_VALID_CURRENCY2);
-            invalidCurrency = new Currency(ID_INVALID_CURRENCY, "yen",
-                    "JPY", RATE_INVALID_CURRENCY);
+            insertSampleRecords();
             list.add(validCurrency1);
             list.add(validCurrency2);
             list.add(invalidCurrency);
@@ -187,10 +272,18 @@ public class TestDaoCurrencyFindAll {
         } catch (CurrenciesWSException paramE) { }
     }
     /**
-     * Loading test db.
-     * @throws Exception exception
+     * Failure test case 2.
+     * @throws CurrenciesWSException custom exception
      */
-    public void insertSampleRecords() throws Exception {
+    @Test(expected = CurrenciesWSException.class)
+    public void testFindAllEchecE() throws CurrenciesWSException {
+        dao.deleteAllCurrencies();
+        dao.findAll();
+    }
+    /**
+     * Loading test db.
+     */
+    public void insertSampleRecords() {
         // clear database
         System.out.println("Deleting records...");
         dao.deleteAllCurrencies();
@@ -202,11 +295,13 @@ public class TestDaoCurrencyFindAll {
                 "GBP", RATE_VALID_CURRENCY2);
         validCurrency3 = new Currency(ID_VALID_CURRENCY3, "euro",
                 "EUR", RATE_VALID_CURRENCY3);
-        invalidCurrency = new Currency(ID_INVALID_CURRENCY, "yen",
-                "JPY", RATE_INVALID_CURRENCY);
-        dao.insert(validCurrency1);
-        dao.insert(validCurrency2);
-        dao.insert(validCurrency3);
-        dao.insert(invalidCurrency);
+        try {
+            dao.insert(validCurrency1);
+            dao.insert(validCurrency2);
+            dao.insert(validCurrency3);
+        } catch (CurrenciesWSException paramE) {
+            // TODO Auto-generated catch block
+            paramE.printStackTrace();
+        }
     }
 }

@@ -20,7 +20,19 @@ public class CurrencyDao implements ICurrencyDao, Serializable {
     /*****************************************************
      * Requetes HQL.
      ****************************************************/
-    private static final String REQFINDCURRENCYBYCODE = "SELECT c FROM Currency c WHERE c.code = :code";
+    /**
+     * REQFINDCURRENCYBYCODE.
+     */
+    private static final String REQFINDCURRENCYBYCODE = "SELECT c FROM"
+            + " Currency c WHERE c.code = :code";
+    /**
+     * REQFINDALL.
+     */
+    private static final String REQFINDALL = "SELECT c FROM Currency c";
+    /**
+     * REQDELALL.
+     */
+    private static final String REQDELALL = "DELETE FROM Currency";
     /**
      * setting injected entity manager..
      */
@@ -36,23 +48,39 @@ public class CurrencyDao implements ICurrencyDao, Serializable {
         if (paramC != null) {
             em.persist(paramC);
         } else {
-            throw new CurrenciesWSException(
-                    CurrenciesWSError.IMPOSSIBLE_AJOUT_DANS_BASE,
-                    "object creation failed");
+            throw new CurrenciesWSException("object creation failed",
+                    CurrenciesWSError.IMPOSSIBLE_AJOUT_DANS_BASE);
         }
         return paramC;
     }
 
     @Override
     public Boolean update(Currency paramC) throws CurrenciesWSException {
-        // TODO Auto-generated method stub
-        return null;
+        Boolean ret = false;
+        if (paramC != null) {
+            if (em.merge(paramC) != null) {
+                ret = true;
+            }
+        }
+        if (!ret) {
+            throw new CurrenciesWSException("object update failed!",
+                    CurrenciesWSError.UPDATE_NON_EFFECTUE_EN_BASE);
+        }
+        return ret;
     }
 
     @Override
-    public Boolean remove(Currency paramC) throws CurrenciesWSException {
-        // TODO Auto-generated method stub
-        return null;
+    public Boolean delete(Currency paramC) throws CurrenciesWSException {
+        Boolean ret = false;
+        if (paramC != null) {
+            em.remove(em.contains(paramC) ? paramC : em.merge(paramC));
+            ret = true;
+        }
+        if (!ret) {
+            throw new CurrenciesWSException("object removal failed",
+                    CurrenciesWSError.IMPOSSIBLE_SUPPRESSION_DANS_BASE);
+        }
+        return ret;
     }
 
     @Override
@@ -60,7 +88,8 @@ public class CurrencyDao implements ICurrencyDao, Serializable {
         Currency c = null;
         c = em.find(Currency.class, paramId);
         if (c == null) {
-            throw new CurrenciesWSException(CurrenciesWSError.RECHERCHE_NON_PRESENTE_EN_BASE, "object not found!");
+            throw new CurrenciesWSException("object not found!",
+                    CurrenciesWSError.RECHERCHE_NON_PRESENTE_EN_BASE);
         }
         return c;
     }
@@ -68,19 +97,18 @@ public class CurrencyDao implements ICurrencyDao, Serializable {
     @Override
     public List<Currency> findAll() throws CurrenciesWSException {
         List<Currency> liste = new ArrayList<Currency>();
-        liste = em.createNamedQuery("currency.findAll", Currency.class)
+        liste = em.createQuery(REQFINDALL, Currency.class)
                 .getResultList();
         if (liste.isEmpty()) {
-            throw new CurrenciesWSException(
-                    CurrenciesWSError.RECHERCHE_NON_PRESENTE_EN_BASE,
-                    "object not found");
+            throw new CurrenciesWSException("objects not found!",
+                    CurrenciesWSError.RECHERCHE_NON_PRESENTE_EN_BASE);
         }
         return liste;
     }
 
     @Override
     public Boolean deleteAllCurrencies() {
-        em.createQuery("DELETE FROM Currency").executeUpdate();
+        em.createQuery(REQDELALL).executeUpdate();
         return true;
     }
 
@@ -91,7 +119,8 @@ public class CurrencyDao implements ICurrencyDao, Serializable {
                 .setParameter("code", paramCode)
                 .getSingleResult();
         if (c == null) {
-            throw new CurrenciesWSException(CurrenciesWSError.RECHERCHE_NON_PRESENTE_EN_BASE, "object not found!");
+            throw new CurrenciesWSException("object not found!",
+                    CurrenciesWSError.RECHERCHE_NON_PRESENTE_EN_BASE);
         }
         return c;
     }
