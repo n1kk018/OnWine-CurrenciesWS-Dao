@@ -112,16 +112,17 @@ public class CurrencyDao implements ICurrencyDao, Serializable {
         return true;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Currency findByCode(String paramCode) throws CurrenciesWSException {
-        Currency c = null;
-        c = (Currency) em.createQuery(REQFINDCURRENCYBYCODE)
+        List<Currency> list = null;
+        list = em.createQuery(REQFINDCURRENCYBYCODE)
                 .setParameter("code", paramCode)
-                .getSingleResult();
-        if (c == null) {
+                .getResultList();
+        if (list.isEmpty()) {
             throw new CurrenciesWSException("object not found!",
                     CurrenciesWSError.RECHERCHE_NON_PRESENTE_EN_BASE);
         }
-        return c;
+        return list.get(0);
     }
 }

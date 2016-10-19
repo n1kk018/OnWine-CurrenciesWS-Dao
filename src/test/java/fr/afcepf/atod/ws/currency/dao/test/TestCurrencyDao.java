@@ -125,7 +125,8 @@ public class TestCurrencyDao {
     @Test
     public void testInsertSuccess() throws CurrenciesWSException {
         dao.deleteAllCurrencies();
-        Currency c = dao.insert(validCurrency1);
+        Currency c = dao.insert(new Currency(null, "dollar",
+                "USD", RATE_VALID_CURRENCY1));
         Assert.assertNotNull(c);
         Assert.assertNotNull(c.getId());
         Assert.assertNotNull(c.getName());
@@ -289,11 +290,11 @@ public class TestCurrencyDao {
         dao.deleteAllCurrencies();
         // insert records
         System.out.println("Inserting records...");
-        validCurrency1 = new Currency(ID_VALID_CURRENCY1, "dollar",
+        validCurrency1 = new Currency(null, "dollar",
                 "USD", RATE_VALID_CURRENCY1);
-        validCurrency2 = new Currency(ID_VALID_CURRENCY2, "livre sterling",
+        validCurrency2 = new Currency(null, "livre sterling",
                 "GBP", RATE_VALID_CURRENCY2);
-        validCurrency3 = new Currency(ID_VALID_CURRENCY3, "euro",
+        validCurrency3 = new Currency(null, "euro",
                 "EUR", RATE_VALID_CURRENCY3);
         try {
             dao.insert(validCurrency1);

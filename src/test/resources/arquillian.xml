@@ -4,8 +4,8 @@
        http://jboss.org/schema/arquillian/arquillian_1_0.xsd">
     <container qualifier="wildfly-10-managed" default="true" >
         <configuration>
-            <!-- <property name="jbossHome">/home/nikko/dev/wildfly-10.1.0.Final</property>-->
-            <property name="jbossHome">C:\serveurs\wildfly-10.1.0.Final</property>
+            <property name="jbossHome">/home/nikko/dev/wildfly-10.1.0.Final</property>
+            <!-- <property name="jbossHome">C:\serveurs\wildfly-10.1.0.Final</property>-->
             <property name="allowConnectingToRunningServer">false</property>
         </configuration>
     </container>
